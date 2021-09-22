@@ -58,3 +58,23 @@ resource "openstack_compute_instance_v2" "this" {
     user = var.ssh_username
   }
 }
+
+module "bridgeline" {
+  source  = "matti/resource/shell"
+  command = "ssh -o StrictHostKeyChecking=no ${var.ssh_username}@${openstack_compute_instance_v2.this.access_ip_v4} sudo cat /var/lib/tor/pt_state/obfs4_bridgeline.txt | tail -n 1"
+}
+
+module "fingerprint_ed25519" {
+  source  = "matti/resource/shell"
+  command = "ssh -o StrictHostKeyChecking=no ${var.ssh_username}@${openstack_compute_instance_v2.this.access_ip_v4} sudo cat /var/lib/tor/fingerprint-ed25519"
+}
+
+module "fingerprint_rsa" {
+  source  = "matti/resource/shell"
+  command = "ssh -o StrictHostKeyChecking=no ${var.ssh_username}@${openstack_compute_instance_v2.this.access_ip_v4} sudo cat /var/lib/tor/fingerprint"
+}
+
+module "hashed_fingerprint" {
+  source  = "matti/resource/shell"
+  command = "ssh -o StrictHostKeyChecking=no ${var.ssh_username}@${openstack_compute_instance_v2.this.access_ip_v4} sudo cat /var/lib/tor/hashed-fingerprint"
+}
