@@ -38,7 +38,7 @@ resource "openstack_compute_instance_v2" "this" {
     ServerTransportListenAddr obfs4 0.0.0.0:${random_integer.obfs_port.result}
     ExtORPort auto
     ContactInfo ${var.contact_info}
-    Nickname ${module.this.id}
+    Nickname ${replace(title(module.this.id), module.this.delimiter, "")}
     EOT
     destination = "/home/debian/torrc"
   }
