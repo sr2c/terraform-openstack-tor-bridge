@@ -1,0 +1,37 @@
+# terraform-openstack-tor-obfs4-bridge
+
+Deploy obfs4 public Tor bridges to Openstack infrastructure.
+
+Example:
+
+```
+provider "openstack" {
+  auth_url    = "https://auth.cloud.ovh.net/v3/"
+  domain_name = "Default" # Domain name - Always at 'default' for OVHcloud
+  user_name = "<horizon username>"
+  password = "<horizon password>"
+  tenant_id = "<find in your openrc.sh downloaded from horizon>"
+  region = "UK1"
+}
+
+locals {
+  ssh_key = file("~/.ssh/id_rsa.pub")
+}
+
+resource "openstack_compute_keypair_v2" "my_ssh_key" {
+  provider   = openstack
+  name       = "terraform"
+  public_key = local.ssh_key
+}
+
+module "bridge" {
+  source = "git::https://gitlab.com/sr2c/terraform-openstack-tor-obfs4-bridge.git?ref=master"
+  count = 1 # increase for more bridges
+  namespace = "yourorg"
+  name = "bridge"
+  attributes = [tostring(count.index)]
+  ssh_keypair_name = openstack_compute_keypair_v2.my_ssh_key.name
+  contact_info = "ididntchangethe@example.com"
+}
+```
+
