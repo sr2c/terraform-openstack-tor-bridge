@@ -25,6 +25,11 @@ resource "openstack_compute_instance_v2" "this" {
     name      = var.external_network_name
   }
 
+  lifecycle {
+    create_before_destroy = true
+    ignore_changes = [image_name]
+  }
+
   provisioner "remote-exec" {
     inline = [
       "sudo apt update",
@@ -33,7 +38,7 @@ resource "openstack_compute_instance_v2" "this" {
       "echo 'deb-src [signed-by=/usr/share/keyrings/tor-archive-keyring.gpg] https://deb.torproject.org/torproject.org buster main' | sudo tee -a /etc/apt/sources.list.d/tor.list",
       "wget -O- https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | gpg --dearmor | sudo tee /usr/share/keyrings/tor-archive-keyring.gpg >/dev/null",
       "sudo apt update",
-      "sudo apt install -y tor deb.torproject.org-keyring obfs4proxy"
+      "sudo apt install -y tor tor-geoipdb deb.torproject.org-keyring obfs4proxy"
     ]
   }
 
@@ -46,6 +51,7 @@ resource "openstack_compute_instance_v2" "this" {
     ExtORPort auto
     ContactInfo ${var.contact_info}
     Nickname ${replace(title(module.this.id), module.this.delimiter, "")}
+    BridgeDistribution ${var.distribution_method}
     EOT
     destination = "/home/debian/torrc"
   }

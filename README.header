@@ -26,7 +26,7 @@ module "bridge" {
   name = "bridge"
   attributes = [tostring(count.index)]
   region = "UK1"
-  ssh_keypair_name = local.ssh_key
+  ssh_key = local.ssh_key
   contact_info = "<admin email address>"
 }
 ```

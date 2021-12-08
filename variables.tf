@@ -17,8 +17,8 @@ variable "flavor_name" {
 
 variable "image_name" {
   type = string
-  description = "Name of the image to use for the compute instance (must be Debian 10 based)."
-  default = "Debian 10"
+  description = "Name of the image to use for the compute instance (must be Debian 11 based)."
+  default = "Debian 11"
 }
 
 variable "region" {
@@ -36,4 +36,15 @@ variable "ssh_username" {
   type = string
   description = "Username to use for SSH access (must have password-less sudo enabled)."
   default = "debian"
+}
+
+variable "distribution_method" {
+  type = string
+  description = "Bridge distribution method"
+  default = "any"
+
+  validation {
+    condition     = contains(["https", "moat", "email", "none", "any"], var.distribution_method)
+    error_message = "Invalid distribution method. Valid choices are https, moat, email, none or any."
+  }
 }
