@@ -33,9 +33,10 @@ resource "openstack_compute_instance_v2" "this" {
   provisioner "remote-exec" {
     inline = [
       "sudo apt update",
+      "sudo apt upgrade -y",
       "sudo apt install -y apt-transport-https",
-      "echo 'deb     [signed-by=/usr/share/keyrings/tor-archive-keyring.gpg] https://deb.torproject.org/torproject.org buster main' | sudo tee /etc/apt/sources.list.d/tor.list",
-      "echo 'deb-src [signed-by=/usr/share/keyrings/tor-archive-keyring.gpg] https://deb.torproject.org/torproject.org buster main' | sudo tee -a /etc/apt/sources.list.d/tor.list",
+      "echo 'deb     [signed-by=/usr/share/keyrings/tor-archive-keyring.gpg] https://deb.torproject.org/torproject.org bullseye main' | sudo tee /etc/apt/sources.list.d/tor.list",
+      "echo 'deb-src [signed-by=/usr/share/keyrings/tor-archive-keyring.gpg] https://deb.torproject.org/torproject.org bullseye main' | sudo tee -a /etc/apt/sources.list.d/tor.list",
       "wget -O- https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | gpg --dearmor | sudo tee /usr/share/keyrings/tor-archive-keyring.gpg >/dev/null",
       "sudo apt update",
       "sudo apt install -y tor tor-geoipdb deb.torproject.org-keyring obfs4proxy"
