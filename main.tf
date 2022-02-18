@@ -15,6 +15,12 @@ resource "openstack_compute_keypair_v2" "this" {
   region     = var.region
 }
 
+data "openstack_images_image_v2" "block_device" {
+  count       = var.require_block_device_creation ? 1 : 0
+  name        = var.image_name
+  most_recent = true
+}
+
 resource "openstack_compute_instance_v2" "this" {
   name        = module.this.id
   region      = var.region
@@ -23,6 +29,18 @@ resource "openstack_compute_instance_v2" "this" {
   key_pair    = openstack_compute_keypair_v2.this.name
   network {
     name      = var.external_network_name
+  }
+
+  dynamic "block_device" {
+    for_each = var.require_block_device_creation ? toset([0]) : toset([])
+    content {
+        uuid = data.openstack_images_image_v2.block_device[block_device.value].id
+        source_type           = "image"
+        volume_size           = 25
+        boot_index            = 0
+        destination_type      = "volume"
+        delete_on_termination = true
+    }
   }
 
   lifecycle {

@@ -27,6 +27,12 @@ variable "region" {
   default = null
 }
 
+variable "require_block_device_creation" {
+  type = bool
+  description = "Create a block device in addition to the server (only needed if not created automatically with instance)."
+  default = false
+}
+
 variable "ssh_key" {
   type = string
   description = "Public SSH key for provisioning."
