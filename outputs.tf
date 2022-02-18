@@ -1,3 +1,7 @@
+output "ansible_inventory" {
+  value = "${module.this.id} ansible_user=${var.ssh_user} ansible_ip=${openstack_compute_instance_v2.this.access_ip_v4}"
+}
+
 output "bridgeline" {
   value = replace(
             replace(
