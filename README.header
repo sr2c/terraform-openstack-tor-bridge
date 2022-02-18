@@ -4,7 +4,7 @@ Deploy obfs4 public Tor bridges to Openstack infrastructure. Many defaults of th
 variables are specific to OVH, but left configurable to be able to be used on other Openstack
 providers.
 
-Example:
+## Example: OVH
 
 ```
 provider "openstack" {
@@ -31,3 +31,34 @@ module "bridge" {
 }
 ```
 
+## Example: GandiCloud VPS
+
+```
+provider "openstack" {
+  auth_url    = "https://keystone.sd6.api.gandi.net:5000/v3"
+  domain_name = "public" # Always at 'public' for GandiCloud VPS
+  region      = "FR-SD6" # This is the only region available at time of writing
+  user_name   = "<Gandi v5 username>"
+  password    = "<Gandi v5 password>"
+  tenant_name = "<Gandi organisation name>"
+}
+
+locals {
+  ssh_key = file("~/.ssh/id_rsa.pub")
+}
+
+module "bridge" {
+  source = "git::https://gitlab.com/sr2c/terraform-openstack-tor-obfs4-bridge.git?ref=master"
+  count = 1 # increase for more bridges
+  namespace = "<yourorg>"
+  name = "bridge"
+  attributes = [tostring(count.index)]
+  region = ""
+  ssh_key = local.ssh_key
+  contact_info = "<admin email address>"
+  image_name = "Debian 11 Bullseye"     # GandiCloud VPS specific value
+  flavor_name = "V-R1"                  # GandiCloud VPS specific value
+  external_network_name = "public"      # GandiCloud VPS specific value
+  require_block_device_creation = true  # GandiCloud VPS specific value
+}
+```

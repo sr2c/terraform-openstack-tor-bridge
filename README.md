@@ -4,7 +4,7 @@ Deploy obfs4 public Tor bridges to Openstack infrastructure. Many defaults of th
 variables are specific to OVH, but left configurable to be able to be used on other Openstack
 providers.
 
-Example:
+## Example: OVH
 
 ```
 provider "openstack" {
@@ -31,6 +31,37 @@ module "bridge" {
 }
 ```
 
+## Example: GandiCloud VPS
+
+```
+provider "openstack" {
+  auth_url    = "https://keystone.sd6.api.gandi.net:5000/v3"
+  domain_name = "public" # Always at 'public' for GandiCloud VPS
+  region      = "FR-SD6" # This is the only region available at time of writing
+  user_name   = "<Gandi v5 username>"
+  password    = "<Gandi v5 password>"
+  tenant_name = "<Gandi organisation name>"
+}
+
+locals {
+  ssh_key = file("~/.ssh/id_rsa.pub")
+}
+
+module "bridge" {
+  source = "git::https://gitlab.com/sr2c/terraform-openstack-tor-obfs4-bridge.git?ref=master"
+  count = 1 # increase for more bridges
+  namespace = "<yourorg>"
+  name = "bridge"
+  attributes = [tostring(count.index)]
+  region = ""
+  ssh_key = local.ssh_key
+  contact_info = "<admin email address>"
+  image_name = "Debian 11 Bullseye"     # GandiCloud VPS specific value
+  flavor_name = "V-R1"                  # GandiCloud VPS specific value
+  external_network_name = "public"      # GandiCloud VPS specific value
+  require_block_device_creation = true  # GandiCloud VPS specific value
+}
+```
 ## Requirements
 
 | Name | Version |
@@ -43,7 +74,7 @@ module "bridge" {
 
 | Name | Version |
 |------|---------|
-| <a name="provider_openstack"></a> [openstack](#provider\_openstack) | 1.42.0 |
+| <a name="provider_openstack"></a> [openstack](#provider\_openstack) | ~> 1.42.0 |
 | <a name="provider_random"></a> [random](#provider\_random) | 3.1.0 |
 
 ## Modules
@@ -64,6 +95,7 @@ module "bridge" {
 | [openstack_compute_keypair_v2.this](https://registry.terraform.io/providers/terraform-provider-openstack/openstack/latest/docs/resources/compute_keypair_v2) | resource |
 | [random_integer.obfs_port](https://registry.terraform.io/providers/hashicorp/random/3.1.0/docs/resources/integer) | resource |
 | [random_integer.or_port](https://registry.terraform.io/providers/hashicorp/random/3.1.0/docs/resources/integer) | resource |
+| [openstack_images_image_v2.block_device](https://registry.terraform.io/providers/terraform-provider-openstack/openstack/latest/docs/data-sources/images_image_v2) | data source |
 
 ## Inputs
 
@@ -90,8 +122,9 @@ module "bridge" {
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | ID element. Usually an abbreviation of your organization name, e.g. 'eg' or 'cp', to help ensure generated IDs are globally unique | `string` | `null` | no |
 | <a name="input_regex_replace_chars"></a> [regex\_replace\_chars](#input\_regex\_replace\_chars) | Terraform regular expression (regex) string.<br>Characters matching the regex will be removed from the ID elements.<br>If not set, `"/[^a-zA-Z0-9-]/"` is used to remove all characters other than hyphens, letters and digits. | `string` | `null` | no |
 | <a name="input_region"></a> [region](#input\_region) | Region to deploy the instance in. | `string` | `null` | no |
+| <a name="input_require_block_device_creation"></a> [require\_block\_device\_creation](#input\_require\_block\_device\_creation) | Create a block device in addition to the server (only needed if not created automatically with instance). | `bool` | `false` | no |
 | <a name="input_ssh_key"></a> [ssh\_key](#input\_ssh\_key) | Public SSH key for provisioning. | `string` | n/a | yes |
-| <a name="input_ssh_username"></a> [ssh\_username](#input\_ssh\_username) | Username to use for SSH access (must have password-less sudo enabled). | `string` | `"debian"` | no |
+| <a name="input_ssh_user"></a> [ssh\_user](#input\_ssh\_user) | Username to use for SSH access (must have password-less sudo enabled). | `string` | `"debian"` | no |
 | <a name="input_stage"></a> [stage](#input\_stage) | ID element. Usually used to indicate role, e.g. 'prod', 'staging', 'source', 'build', 'test', 'deploy', 'release' | `string` | `null` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Additional tags (e.g. `{'BusinessUnit': 'XYZ'}`).<br>Neither the tag keys nor the tag values will be modified by this module. | `map(string)` | `{}` | no |
 | <a name="input_tenant"></a> [tenant](#input\_tenant) | ID element \_(Rarely used, not included by default)\_. A customer identifier, indicating who this instance of a resource is for | `string` | `null` | no |
@@ -100,6 +133,7 @@ module "bridge" {
 
 | Name | Description |
 |------|-------------|
+| <a name="output_ansible_inventory"></a> [ansible\_inventory](#output\_ansible\_inventory) | n/a |
 | <a name="output_bridgeline"></a> [bridgeline](#output\_bridgeline) | The bridgeline that would allow a Tor client to use this bridge. |
 | <a name="output_fingerprint_ed25519"></a> [fingerprint\_ed25519](#output\_fingerprint\_ed25519) | The Ed25519 fingerprint of this bridge. |
 | <a name="output_fingerprint_rsa"></a> [fingerprint\_rsa](#output\_fingerprint\_rsa) | The hex-encoded RSA fingerprint of this bridge. |
@@ -109,3 +143,4 @@ module "bridge" {
 | <a name="output_nickname"></a> [nickname](#output\_nickname) | The nickname of the bridge published in the bridge descriptors. This is based on the ID, reformatted for the nickname restrictions. |
 | <a name="output_obfs_port"></a> [obfs\_port](#output\_obfs\_port) | The TCP port number used for the obfs4 port. This is treated as sensitive as this information may be used to censor access to the bridge. |
 | <a name="output_or_port"></a> [or\_port](#output\_or\_port) | The TCP port number used for the OR port. This is treated as sensitive as this information may be used to censor access to the bridge. |
+| <a name="output_ssh_user"></a> [ssh\_user](#output\_ssh\_user) | The username used for SSH access. |
