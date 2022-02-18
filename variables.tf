@@ -38,7 +38,7 @@ variable "ssh_key" {
   description = "Public SSH key for provisioning."
 }
 
-variable "ssh_username" {
+variable "ssh_user" {
   type = string
   description = "Username to use for SSH access (must have password-less sudo enabled)."
   default = "debian"

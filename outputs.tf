@@ -53,3 +53,8 @@ output "obfs_port" {
   sensitive = true
   description = "The TCP port number used for the obfs4 port. This is treated as sensitive as this information may be used to censor access to the bridge."
 }
+
+output "ssh_user" {
+  value = var.ssh_user
+  description = "The username used for SSH access."
+}
