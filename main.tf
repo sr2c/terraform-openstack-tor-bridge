@@ -21,6 +21,23 @@ data "openstack_images_image_v2" "block_device" {
   most_recent = true
 }
 
+module "torrc" {
+  source = "../terraform-null-torrc"
+  bridge_relay = 1
+  or_port = random_integer.or_port.result
+  server_transport_plugin = "obfs4 exec /usr/bin/obfs4proxy"
+  server_transport_listen_addr = "obfs4 0.0.0.0:${random_integer.obfs_port.result}"
+  ext_or_port = "auto"
+  contact_info = var.contact_info
+  nickname = replace(title(module.this.id), module.this.delimiter, "")
+  bridge_distribution = var.distribution_method
+}
+
+module "user_data" {
+  source = "../terraform-cloudinit-tor"
+  torrc = module.torrc.rendered
+}
+
 resource "openstack_compute_instance_v2" "this" {
   name        = module.this.id
   region      = var.region
@@ -30,6 +47,8 @@ resource "openstack_compute_instance_v2" "this" {
   network {
     name      = var.external_network_name
   }
+
+  user_data = module.user_data.rendered
 
   dynamic "block_device" {
     for_each = var.require_block_device_creation ? toset([0]) : toset([])
@@ -45,42 +64,12 @@ resource "openstack_compute_instance_v2" "this" {
 
   lifecycle {
     create_before_destroy = true
-    ignore_changes = [image_name]
+    ignore_changes = [image_name,user_data]
   }
 
   provisioner "remote-exec" {
     inline = [
-      "sudo apt update",
-      "sudo apt upgrade -y",
-      "sudo apt install -y apt-transport-https gnupg2",
-      "echo 'deb     [signed-by=/usr/share/keyrings/tor-archive-keyring.gpg] https://deb.torproject.org/torproject.org bullseye main' | sudo tee /etc/apt/sources.list.d/tor.list",
-      "echo 'deb-src [signed-by=/usr/share/keyrings/tor-archive-keyring.gpg] https://deb.torproject.org/torproject.org bullseye main' | sudo tee -a /etc/apt/sources.list.d/tor.list",
-      "wget -O- https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | gpg --dearmor | sudo tee /usr/share/keyrings/tor-archive-keyring.gpg >/dev/null",
-      "sudo apt update",
-      "sudo apt install -y tor tor-geoipdb deb.torproject.org-keyring obfs4proxy"
-    ]
-  }
-
-  provisioner "file" {
-    content = <<-EOT
-    BridgeRelay 1
-    ORPort ${random_integer.or_port.result}
-    ServerTransportPlugin obfs4 exec /usr/bin/obfs4proxy
-    ServerTransportListenAddr obfs4 0.0.0.0:${random_integer.obfs_port.result}
-    ExtORPort auto
-    ContactInfo ${var.contact_info}
-    Nickname ${replace(title(module.this.id), module.this.delimiter, "")}
-    BridgeDistribution ${var.distribution_method}
-    EOT
-    destination = "/home/debian/torrc"
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-      "sudo mv /home/debian/torrc /etc/tor/torrc",
-      "sudo chown root:root /etc/tor/torrc",
-      "sudo chmod 644 /etc/tor/torrc",
-      "sudo systemctl restart tor"
+      "cloud-init status --wait"
     ]
   }
 
@@ -88,6 +77,7 @@ resource "openstack_compute_instance_v2" "this" {
     host = self.access_ip_v4
     type = "ssh"
     user = var.ssh_user
+    timeout = "5m"
   }
 }
 

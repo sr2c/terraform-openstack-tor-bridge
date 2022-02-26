@@ -1,5 +1,7 @@
 output "ansible_inventory" {
-  value = "${module.this.id} ansible_user=${var.ssh_user} ansible_ip=${openstack_compute_instance_v2.this.access_ip_v4}"
+  value = "${module.this.id} ansible_user=${var.ssh_user} ansible_host=${openstack_compute_instance_v2.this.access_ip_v4}"
+  sensitive = true
+  description = "An Ansible inventory line that allows login to the bridge with the correct username."
 }
 
 output "bridgeline" {
