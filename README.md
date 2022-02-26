@@ -86,7 +86,7 @@ module "bridge" {
 | <a name="module_fingerprint_rsa"></a> [fingerprint\_rsa](#module\_fingerprint\_rsa) | matti/resource/shell | 1.5.0 |
 | <a name="module_hashed_fingerprint"></a> [hashed\_fingerprint](#module\_hashed\_fingerprint) | matti/resource/shell | 1.5.0 |
 | <a name="module_this"></a> [this](#module\_this) | cloudposse/label/null | 0.25.0 |
-| <a name="module_torrc"></a> [torrc](#module\_torrc) | sr2c/tor/torrc | 0.0.4 |
+| <a name="module_torrc"></a> [torrc](#module\_torrc) | sr2c/torrc/null | 0.0.4 |
 | <a name="module_user_data"></a> [user\_data](#module\_user\_data) | sr2c/tor/cloudinit | 0.0.2 |
 
 ## Resources

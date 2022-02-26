@@ -22,7 +22,7 @@ data "openstack_images_image_v2" "block_device" {
 }
 
 module "torrc" {
-  source = "sr2c/tor/torrc"
+  source = "sr2c/torrc/null"
   version = "0.0.4"
   bridge_relay = 1
   or_port = random_integer.or_port.result
