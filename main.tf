@@ -22,7 +22,8 @@ data "openstack_images_image_v2" "block_device" {
 }
 
 module "torrc" {
-  source = "../terraform-null-torrc"
+  source = "sr2c/tor/torrc"
+  version = "0.0.4"
   bridge_relay = 1
   or_port = random_integer.or_port.result
   server_transport_plugin = "obfs4 exec /usr/bin/obfs4proxy"
@@ -34,7 +35,8 @@ module "torrc" {
 }
 
 module "user_data" {
-  source = "../terraform-cloudinit-tor"
+  source = "sr2c/tor/cloudinit"
+  version = "0.0.2"
   torrc = module.torrc.rendered
 }
 
