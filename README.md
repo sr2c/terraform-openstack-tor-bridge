@@ -86,6 +86,8 @@ module "bridge" {
 | <a name="module_fingerprint_rsa"></a> [fingerprint\_rsa](#module\_fingerprint\_rsa) | matti/resource/shell | 1.5.0 |
 | <a name="module_hashed_fingerprint"></a> [hashed\_fingerprint](#module\_hashed\_fingerprint) | matti/resource/shell | 1.5.0 |
 | <a name="module_this"></a> [this](#module\_this) | cloudposse/label/null | 0.25.0 |
+| <a name="module_torrc"></a> [torrc](#module\_torrc) | sr2c/tor/torrc | 0.0.4 |
+| <a name="module_user_data"></a> [user\_data](#module\_user\_data) | sr2c/tor/cloudinit | 0.0.2 |
 
 ## Resources
 
@@ -133,7 +135,7 @@ module "bridge" {
 
 | Name | Description |
 |------|-------------|
-| <a name="output_ansible_inventory"></a> [ansible\_inventory](#output\_ansible\_inventory) | n/a |
+| <a name="output_ansible_inventory"></a> [ansible\_inventory](#output\_ansible\_inventory) | An Ansible inventory line that allows login to the bridge with the correct username. |
 | <a name="output_bridgeline"></a> [bridgeline](#output\_bridgeline) | The bridgeline that would allow a Tor client to use this bridge. |
 | <a name="output_fingerprint_ed25519"></a> [fingerprint\_ed25519](#output\_fingerprint\_ed25519) | The Ed25519 fingerprint of this bridge. |
 | <a name="output_fingerprint_rsa"></a> [fingerprint\_rsa](#output\_fingerprint\_rsa) | The hex-encoded RSA fingerprint of this bridge. |
