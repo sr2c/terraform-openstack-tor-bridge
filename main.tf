@@ -13,6 +13,10 @@ resource "openstack_compute_keypair_v2" "this" {
   name       = module.this.id
   public_key = var.ssh_key
   region     = var.region
+
+  lifecycle {
+    ignore_changes = [public_key]
+  }
 }
 
 data "openstack_images_image_v2" "block_device" {
@@ -36,7 +40,7 @@ module "torrc" {
 
 module "user_data" {
   source = "sr2c/tor/cloudinit"
-  version = "0.0.2"
+  version = "0.0.3"
   torrc = module.torrc.rendered
 }
 
