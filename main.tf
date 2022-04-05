@@ -40,7 +40,7 @@ module "torrc" {
 
 module "user_data" {
   source = "sr2c/tor/cloudinit"
-  version = "0.0.3"
+  version = "0.0.4"
   torrc = module.torrc.rendered
 }
 
