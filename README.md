@@ -87,7 +87,7 @@ module "bridge" {
 | <a name="module_hashed_fingerprint"></a> [hashed\_fingerprint](#module\_hashed\_fingerprint) | matti/resource/shell | 1.5.0 |
 | <a name="module_this"></a> [this](#module\_this) | cloudposse/label/null | 0.25.0 |
 | <a name="module_torrc"></a> [torrc](#module\_torrc) | sr2c/torrc/null | 0.0.4 |
-| <a name="module_user_data"></a> [user\_data](#module\_user\_data) | sr2c/tor/cloudinit | 0.0.2 |
+| <a name="module_user_data"></a> [user\_data](#module\_user\_data) | sr2c/tor/cloudinit | 0.0.4 |
 
 ## Resources
 
@@ -126,6 +126,7 @@ module "bridge" {
 | <a name="input_region"></a> [region](#input\_region) | Region to deploy the instance in. | `string` | `null` | no |
 | <a name="input_require_block_device_creation"></a> [require\_block\_device\_creation](#input\_require\_block\_device\_creation) | Create a block device in addition to the server (only needed if not created automatically with instance). | `bool` | `false` | no |
 | <a name="input_ssh_key"></a> [ssh\_key](#input\_ssh\_key) | Public SSH key for provisioning. | `string` | n/a | yes |
+| <a name="input_ssh_private_key"></a> [ssh\_private\_key](#input\_ssh\_private\_key) | Private SSH key for provisioning. | `string` | n/a | yes |
 | <a name="input_ssh_user"></a> [ssh\_user](#input\_ssh\_user) | Username to use for SSH access (must have password-less sudo enabled). | `string` | `"debian"` | no |
 | <a name="input_stage"></a> [stage](#input\_stage) | ID element. Usually used to indicate role, e.g. 'prod', 'staging', 'source', 'build', 'test', 'deploy', 'release' | `string` | `null` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Additional tags (e.g. `{'BusinessUnit': 'XYZ'}`).<br>Neither the tag keys nor the tag values will be modified by this module. | `map(string)` | `{}` | no |

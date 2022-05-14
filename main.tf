@@ -83,6 +83,7 @@ resource "openstack_compute_instance_v2" "this" {
     host = self.access_ip_v4
     type = "ssh"
     user = var.ssh_user
+    private_key = var.ssh_private_key
     timeout = "5m"
   }
 }

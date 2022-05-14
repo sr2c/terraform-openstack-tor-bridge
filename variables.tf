@@ -33,6 +33,11 @@ variable "require_block_device_creation" {
   default = false
 }
 
+variable "ssh_private_key" {
+  type = string
+  description = "Private SSH key for provisioning."
+}
+
 variable "ssh_key" {
   type = string
   description = "Public SSH key for provisioning."
