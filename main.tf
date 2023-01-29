@@ -11,7 +11,7 @@ resource "random_integer" "or_port" {
 resource "openstack_compute_keypair_v2" "this" {
   provider   = openstack
   name       = module.this.id
-  public_key = var.ssh_key
+  public_key = file(var.ssh_public_key)
   region     = var.region
 
   lifecycle {
@@ -26,22 +26,23 @@ data "openstack_images_image_v2" "block_device" {
 }
 
 module "torrc" {
-  source = "sr2c/torrc/null"
-  version = "0.0.4"
-  bridge_relay = 1
-  or_port = random_integer.or_port.result
-  server_transport_plugin = "obfs4 exec /usr/bin/obfs4proxy"
+  source                       = "sr2c/torrc/null"
+  version                      = "0.0.4"
+  bridge_relay                 = 1
+  or_port                      = random_integer.or_port.result
+  server_transport_plugin      = "obfs4 exec /usr/bin/obfs4proxy"
   server_transport_listen_addr = "obfs4 0.0.0.0:${random_integer.obfs_port.result}"
-  ext_or_port = "auto"
-  contact_info = var.contact_info
-  nickname = replace(title(module.this.id), module.this.delimiter, "")
-  bridge_distribution = var.distribution_method
+  ext_or_port                  = "auto"
+  contact_info                 = var.contact_info
+  nickname                     = replace(title(module.this.id), module.this.delimiter, "")
+  bridge_distribution          = var.distribution_method
 }
 
 module "user_data" {
-  source = "sr2c/tor/cloudinit"
-  version = "0.0.6"
-  torrc = module.torrc.rendered
+  source             = "sr2c/tor/cloudinit"
+  version            = "0.1.0"
+  torrc              = module.torrc.rendered
+  install_obfs4proxy = true
 }
 
 resource "openstack_compute_instance_v2" "this" {
@@ -51,7 +52,7 @@ resource "openstack_compute_instance_v2" "this" {
   flavor_name = var.flavor_name
   key_pair    = openstack_compute_keypair_v2.this.name
   network {
-    name      = var.external_network_name
+    name = var.external_network_name
   }
 
   user_data = module.user_data.rendered
@@ -59,18 +60,19 @@ resource "openstack_compute_instance_v2" "this" {
   dynamic "block_device" {
     for_each = var.require_block_device_creation ? toset([0]) : toset([])
     content {
-        uuid = data.openstack_images_image_v2.block_device[block_device.value].id
-        source_type           = "image"
-        volume_size           = 25
-        boot_index            = 0
-        destination_type      = "volume"
-        delete_on_termination = true
+      uuid                  = data.openstack_images_image_v2.block_device[block_device.value].id
+      source_type           = "image"
+      volume_size           = 25
+      boot_index            = 0
+      destination_type      = "volume"
+      delete_on_termination = true
     }
   }
 
   lifecycle {
-    create_before_destroy = true
-    ignore_changes = [image_name,user_data]
+    ignore_changes = [
+      image_name, user_data
+    ]
   }
 
   provisioner "remote-exec" {
@@ -80,34 +82,34 @@ resource "openstack_compute_instance_v2" "this" {
   }
 
   connection {
-    host = self.access_ip_v4
-    type = "ssh"
-    user = var.ssh_user
-    private_key = var.ssh_private_key
-    timeout = "5m"
+    host        = self.access_ip_v4
+    type        = "ssh"
+    user        = var.ssh_user
+    private_key = file(var.ssh_private_key)
+    timeout     = "10m"
   }
 }
 
 module "bridgeline" {
   source  = "matti/resource/shell"
   version = "1.5.0"
-  command = "ssh -o StrictHostKeyChecking=no ${var.ssh_user}@${openstack_compute_instance_v2.this.access_ip_v4} sudo cat /var/lib/tor/pt_state/obfs4_bridgeline.txt | tail -n 1"
+  command = "ssh -o StrictHostKeyChecking=no -i ${var.ssh_private_key} ${var.ssh_user}@${openstack_compute_instance_v2.this.access_ip_v4} sudo cat /var/lib/tor/pt_state/obfs4_bridgeline.txt | tail -n 1"
 }
 
 module "fingerprint_ed25519" {
   source  = "matti/resource/shell"
   version = "1.5.0"
-  command = "ssh -o StrictHostKeyChecking=no ${var.ssh_user}@${openstack_compute_instance_v2.this.access_ip_v4} sudo cat /var/lib/tor/fingerprint-ed25519"
+  command = "ssh -o StrictHostKeyChecking=no -i ${var.ssh_private_key} ${var.ssh_user}@${openstack_compute_instance_v2.this.access_ip_v4} sudo cat /var/lib/tor/fingerprint-ed25519"
 }
 
 module "fingerprint_rsa" {
   source  = "matti/resource/shell"
   version = "1.5.0"
-  command = "ssh -o StrictHostKeyChecking=no ${var.ssh_user}@${openstack_compute_instance_v2.this.access_ip_v4} sudo cat /var/lib/tor/fingerprint"
+  command = "ssh -o StrictHostKeyChecking=no -i ${var.ssh_private_key} ${var.ssh_user}@${openstack_compute_instance_v2.this.access_ip_v4} sudo cat /var/lib/tor/fingerprint"
 }
 
 module "hashed_fingerprint" {
   source  = "matti/resource/shell"
   version = "1.5.0"
-  command = "ssh -o StrictHostKeyChecking=no ${var.ssh_user}@${openstack_compute_instance_v2.this.access_ip_v4} sudo cat /var/lib/tor/hashed-fingerprint"
+  command = "ssh -o StrictHostKeyChecking=no -i ${var.ssh_private_key} ${var.ssh_user}@${openstack_compute_instance_v2.this.access_ip_v4} sudo cat /var/lib/tor/hashed-fingerprint"
 }
