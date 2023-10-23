@@ -55,7 +55,7 @@ variable "distribution_method" {
   default     = "any"
 
   validation {
-    condition     = contains(["https", "moat", "email", "none", "any"], var.distribution_method)
-    error_message = "Invalid distribution method. Valid choices are https, moat, email, none or any."
+    condition     = contains(["https", "moat", "email", "settings", "none", "any"], var.distribution_method)
+    error_message = "Invalid distribution method. Valid choices are https, moat, email, settings, none or any."
   }
 }
