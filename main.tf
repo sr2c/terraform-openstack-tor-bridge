@@ -40,7 +40,7 @@ module "torrc" {
 
 module "user_data" {
   source             = "sr2c/tor/cloudinit"
-  version            = "0.1.1"
+  version            = "0.1.2"
   torrc              = module.torrc.rendered
   install_obfs4proxy = true
 }
